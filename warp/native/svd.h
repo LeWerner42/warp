@@ -456,8 +456,16 @@ void _svd_2(// input A
     Type sigma2 = sqrt(lambda2);
 
     // Step 4: Eigenvectors (find V)
-    Type v1x = ATA12, v1y = lambda1 - ATA11; // For first eigenvector
-    Type v2x = ATA12, v2y = lambda2 - ATA11; // For second eigenvector
+    Type v1x, v1y, v2x, v2y;
+    if (abs(ATA12) > 1e-6) { // General case
+        v1x = ATA12;
+        v1y = lambda1 - ATA11;
+        v2x = ATA12;
+        v2y = lambda2 - ATA11;
+    } else { // Handle the diagonal matrix case
+        v1x = 1; v1y = 0; // Eigenvector for lambda1
+        v2x = 0; v2y = 1; // Eigenvector for lambda2
+}
     Type norm1 = sqrt(v1x * v1x + v1y * v1y);
     Type norm2 = sqrt(v2x * v2x + v2y * v2y);
 
