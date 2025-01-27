@@ -439,40 +439,34 @@ void _svd_2(// input A
         Type &v11, Type &v12,
         Type &v21, Type &v22)
 {
-    // Step 1: Compute ATA
+    // Step 1: Compute A^T * A
     Type ATA11 = a11 * a11 + a21 * a21;
     Type ATA12 = a11 * a12 + a21 * a22;
     Type ATA22 = a12 * a12 + a22 * a22;
 
-    // Step 2: Eigenanalysis
-    Type trace = ATA11 + ATA22;
-    Type det = ATA11 * ATA22 - ATA12 * ATA12;
-    Type sqrt_term = sqrt(trace * trace - Type(4.0) * det);
-    Type lambda1 = (trace + sqrt_term) * Type(0.5);
-    Type lambda2 = (trace - sqrt_term) * Type(0.5);
+    // Step 2: Perform QR decomposition on A
+    // QR decomposition involves creating a Q matrix (orthogonal) and R matrix (upper triangular)
+    // Perform Householder transformation to create Q and R (simplified here)
 
-    // Step 3: Singular values
-    Type sigma1 = sqrt(lambda1);
-    Type sigma2 = sqrt(lambda2);
+    Type r11 = sqrt(a11 * a11 + a21 * a21);
+    Type r12 = a11 * a12 + a21 * a22;
+    Type r22 = sqrt(a12 * a12 + a22 * a22 - r12 * r12 / r11);
 
-    // Step 4: Eigenvectors (find V)
-    Type v1x, v1y, v2x, v2y;
-    if (abs(ATA12) > 1e-6) { // General case
-        v1x = ATA12;
-        v1y = lambda1 - ATA11;
-        v2x = ATA12;
-        v2y = lambda2 - ATA11;
-    } else { // Handle the diagonal matrix case
-        v1x = 1; v1y = 0; // Eigenvector for lambda1
-        v2x = 0; v2y = 1; // Eigenvector for lambda2
-}
-    Type norm1 = sqrt(v1x * v1x + v1y * v1y);
-    Type norm2 = sqrt(v2x * v2x + v2y * v2y);
+    Type q11 = a11 / r11;
+    Type q21 = a21 / r11;
+    Type q12 = (a12 - r12 * q11 / r11) / r22;
+    Type q22 = (a22 - r12 * q21 / r11) / r22;
 
-    v11 = v1x / norm1; v12 = v2x / norm2;
-    v21 = v1y / norm1; v22 = v2y / norm2;
+    // Step 3: Compute Singular values from diagonal of R
+    Type sigma1 = r11;
+    Type sigma2 = r22;
 
-    // Step 5: Compute U
+    // Step 4: Compute V from QR decomposition
+    // Since R is upper triangular, V can be constructed using the columns of Q
+    v11 = q11; v12 = q12;
+    v21 = q21; v22 = q22;
+
+    // Step 5: Compute U from A and V
     Type inv_sigma1 = (sigma1 > Type(1e-6)) ? Type(1.0) / sigma1 : Type(0.0);
     Type inv_sigma2 = (sigma2 > Type(1e-6)) ? Type(1.0) / sigma2 : Type(0.0);
 
